@@ -58,7 +58,7 @@ function! youcompleteme#Enable()
   call s:Python( 'sys.path.insert( 0, "' . s:script_folder_path . '/../python" )' )
   call s:Python( 'import ycm' )
 
-  if !call s:Pyeval( 'ycm.CompatibleWithYcmCore()')
+  if !s:Pyeval( 'ycm.CompatibleWithYcmCore()')
     echohl WarningMsg |
       \ echomsg "YouCompleteMe unavailable: ycm_core too old, PLEASE RECOMPILE ycm_core" |
       \ echohl None
@@ -235,7 +235,7 @@ function! s:SetCompleteFunc()
   let &completefunc = 'youcompleteme#Complete'
   let &l:completefunc = 'youcompleteme#Complete'
 
-  if call s:Pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' )
+  if s:Pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' )
     let &omnifunc = 'youcompleteme#OmniComplete'
     let &l:omnifunc = 'youcompleteme#OmniComplete'
 
@@ -360,15 +360,15 @@ endfunction
 
 function! s:UpdateDiagnosticNotifications()
   if get( g:, 'loaded_syntastic_plugin', 0 ) &&
-        \ call s:Pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' ) &&
-        \ call s:Pyeval( 'ycm_state.DiagnosticsForCurrentFileReady()' )
+        \ s:Pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' ) &&
+        \ s:Pyeval( 'ycm_state.DiagnosticsForCurrentFileReady()' )
     SyntasticCheck
   endif
 endfunction
 
 
 function! s:IdentifierFinishedOperations()
-  if !call s:Pyeval( 'ycm.CurrentIdentifierFinished()' )
+  if !s:Pyeval( 'ycm.CurrentIdentifierFinished()' )
     return
   endif
   call s:Python( 'ycm_state.OnCurrentIdentifierFinished()' )
@@ -392,7 +392,7 @@ endfunction
 
 
 function! s:OnBlankLine()
-  return call s:Pyeval( 'not vim.current.line or vim.current.line.isspace()' )
+  return s:Pyeval( 'not vim.current.line or vim.current.line.isspace()' )
 endfunction
 
 
@@ -436,18 +436,18 @@ function! s:CompletionsForQuery( query, use_filetype_completer )
   endif
 
   " TODO: don't trigger on a dot inside a string constant
-  call s:Python( "completer.CandidatesForQueryAsync( vim.eval( 'a:query' ) )" )
+  call s:Python( 'completer.CandidatesForQueryAsync( "' . a:query . '" )' )
 
   let l:results_ready = 0
   while !l:results_ready
-    let l:results_ready = call s:Pyeval( 'completer.AsyncCandidateRequestReady()' )
+    let l:results_ready = s:Pyeval( 'completer.AsyncCandidateRequestReady()' )
     if complete_check()
       let s:searched_and_results_found = 0
       return { 'words' : [], 'refresh' : 'always'}
     endif
   endwhile
 
-  let l:results = call s:Pyeval( 'completer.CandidatesFromStoredRequest()' )
+  let l:results = s:Pyeval( 'completer.CandidatesFromStoredRequest()' )
   let s:searched_and_results_found = len( l:results ) != 0
   return { 'words' : l:results, 'refresh' : 'always' }
 endfunction
@@ -475,13 +475,13 @@ function! youcompleteme#Complete( findstart, base )
 
 
     " TODO: make this a function-local variable instead of a script-local one
-    let s:completion_start_column = call s:Pyeval( 'ycm.CompletionStartColumn()' )
+    let s:completion_start_column = s:Pyeval( 'ycm.CompletionStartColumn()' )
     let s:should_use_filetype_completion =
-          \ call s:Pyeval( 'ycm_state.ShouldUseFiletypeCompleter(' .
+          \ s:Pyeval( 'ycm_state.ShouldUseFiletypeCompleter(' .
           \ s:completion_start_column . ')' )
 
     if !s:should_use_filetype_completion &&
-          \ !call s:Pyeval( 'ycm_state.ShouldUseIdentifierCompleter(' .
+          \ !s:Pyeval( 'ycm_state.ShouldUseIdentifierCompleter(' .
           \ s:completion_start_column . ')' )
       " for vim, -2 means not found but don't trigger an error message
       " see :h complete-functions
@@ -497,7 +497,7 @@ endfunction
 function! youcompleteme#OmniComplete( findstart, base )
   if a:findstart
     let s:omnifunc_mode = 1
-    let s:completion_start_column = call s:Pyeval( 'ycm.CompletionStartColumn()' )
+    let s:completion_start_column = s:Pyeval( 'ycm.CompletionStartColumn()' )
     return s:completion_start_column
   else
     return s:CompletionsForQuery( a:base, 1 )
@@ -516,13 +516,13 @@ command! YcmShowDetailedDiagnostic call s:ShowDetailedDiagnostic()
 " required (currently that's on buffer save) OR when the SyntasticCheck command
 " is invoked
 function! youcompleteme#CurrentFileDiagnostics()
-  return call s:Pyeval( 'ycm_state.GetDiagnosticsForCurrentFile()' )
+  return s:Pyeval( 'ycm_state.GetDiagnosticsForCurrentFile()' )
 endfunction
 
 
 function! s:DebugInfo()
   echom "Printing YouCompleteMe debug information..."
-  let debug_info = call s:Pyeval( 'ycm_state.DebugInfo()' )
+  let debug_info = s:Pyeval( 'ycm_state.DebugInfo()' )
   for line in split( debug_info, "\n" )
     echom '-- ' . line
   endfor
@@ -549,7 +549,7 @@ function! s:CompleterCommand(...)
       call s:Python( "completer = ycm_state.GetFiletypeCompleterForFiletype(vim.eval('a:1').lstrip('ft=') )" )
     endif
     let arguments = arguments[1:]
-  elseif call s:Pyeval( 'ycm_state.NativeFiletypeCompletionAvailable()' )
+  elseif s:Pyeval( 'ycm_state.NativeFiletypeCompletionAvailable()' )
     call s:Python( 'completer = ycm_state.GetFiletypeCompleter()' )
   else
     echohl WarningMsg |
@@ -565,22 +565,22 @@ endfunction
 command! -nargs=* YcmCompleter call s:CompleterCommand(<f-args>)
 
 function! s:ForceCompile()
-  if !call s:Pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' )
+  if !s:Pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' )
     echom "Native filetype completion not supported for current file, "
           \ . "cannot force recompilation."
     return 0
   endif
 
   echom "Forcing compilation, this will block Vim until done."
-  call s:Pyeval( 'ycm_state.OnFileReadyToParse()' )
+  call s:Python( 'ycm_state.OnFileReadyToParse()' )
   while 1
-    let diagnostics_ready = call s:Pyeval(
+    let diagnostics_ready = s:Pyeval(
           \ 'ycm_state.DiagnosticsForCurrentFileReady()' )
     if diagnostics_ready
       break
     endif
 
-    let getting_completions = call s:Pyeval(
+    let getting_completions = s:Pyeval(
           \ 'ycm_state.GettingCompletions()' )
 
     if !getting_completions
@@ -613,7 +613,7 @@ function! s:ShowDiagnostics()
     return
   endif
 
-  let diags = call s:Pyeval( 'ycm_state.GetDiagnosticsForCurrentFile()' )
+  let diags = s:Pyeval( 'ycm_state.GetDiagnosticsForCurrentFile()' )
   if !empty( diags )
     call setloclist( 0, diags )
     lopen

@@ -27,7 +27,7 @@ function python_finder {
 
   # The CMake 'FindPythonLibs' Module does not work properly.
   # So we are forced to do its job for it.
-  python_prefix=$(python-config --prefix | sed 's/^[ \t]*//')
+  python_prefix=$(python3-config --prefix | sed 's/^[ \t]*//')
   if [ -f "${python_prefix}/Python" ]; then
     python_library+="${python_prefix}/Python"
     python_include+="${python_prefix}/Headers"

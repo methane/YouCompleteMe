@@ -25,7 +25,7 @@ cmake_minimum_required( VERSION 2.8 )
 
 project( BoostParts )
 
-set( Python_ADDITIONAL_VERSIONS 2.7 2.6 2.5 )
+set( Python_ADDITIONAL_VERSIONS 3.3 2.7 2.6 2.5 )
 find_package( PythonLibs 2.5 REQUIRED )
 
 file( GLOB_RECURSE SOURCES *.cpp )

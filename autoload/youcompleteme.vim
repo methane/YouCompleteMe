@@ -341,7 +341,7 @@ function! s:SetCompleteFunc()
   let &completefunc = 'youcompleteme#Complete'
   let &l:completefunc = 'youcompleteme#Complete'
 
-  if s:Pyeval 'ycm_state.NativeFiletypeCompletionUsable()'
+  if s:Pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' )
     let &omnifunc = 'youcompleteme#OmniComplete'
     let &l:omnifunc = 'youcompleteme#OmniComplete'
 
@@ -474,14 +474,14 @@ function! s:UpdateDiagnosticNotifications()
     return
   endif
 
-  if s:Pyeval 'ycm_state.DiagnosticsForCurrentFileReady()'
+  if s:Pyeval( 'ycm_state.DiagnosticsForCurrentFileReady()' )
     SyntasticCheck
   endif
 endfunction
 
 
 function! s:IdentifierFinishedOperations()
-  if !s:Pyeval 'base.CurrentIdentifierFinished()'
+  if !s:Pyeval( 'base.CurrentIdentifierFinished()' )
     return
   endif
   Python ycm_state.OnCurrentIdentifierFinished()

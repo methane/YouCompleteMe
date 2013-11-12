@@ -20,6 +20,7 @@
 from collections import defaultdict
 from copy import deepcopy
 import os
+from ycm._compat import iteritems
 
 DEFAULT_FILETYPE_TRIGGERS = {
   'c' : ['->', '.'],
@@ -38,7 +39,7 @@ DEFAULT_FILETYPE_TRIGGERS = {
 def _FiletypeTriggerDictFromSpec( trigger_dict_spec ):
   triggers_for_filetype = defaultdict( set )
 
-  for key, value in trigger_dict_spec.iteritems():
+  for key, value in iteritems(trigger_dict_spec):
     filetypes = key.split( ',' )
     for filetype in filetypes:
       triggers_for_filetype[ filetype ].update( value )
@@ -52,7 +53,7 @@ def _FiletypeDictUnion( dict_one, dict_two ):
 
   final_dict = deepcopy( dict_one )
 
-  for key, value in dict_two.iteritems():
+  for key, value in iteritems(dict_two):
     final_dict[ key ].update( value )
 
   return final_dict

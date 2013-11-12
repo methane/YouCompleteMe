@@ -24,6 +24,7 @@ from ycm import extra_conf_store
 from ycm.utils import ToUtf8IfNeeded
 from ycm.completers.completer import Completer
 from ycm.completers.cpp.flags import Flags, PrepareFlagsForClang
+from ycm._compat import iteritems
 
 CLANG_FILETYPES = set( [ 'c', 'cpp', 'objc', 'objcpp' ] )
 MIN_LINES_IN_FILE_TO_PARSE = 5
@@ -53,7 +54,7 @@ class ClangCompleter( Completer ):
 
   def GetUnsavedFilesVector( self, request_data ):
     files = ycm_core.UnsavedFileVec()
-    for filename, file_data in request_data[ 'file_data' ].iteritems():
+    for filename, file_data in iteritems(request_data[ 'file_data' ]):
       if not ClangAvailableForFiletypes( file_data[ 'filetypes' ] ):
         continue
       contents = file_data[ 'contents' ]

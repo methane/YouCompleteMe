@@ -22,10 +22,14 @@ set cpo&vim
 " jedi-vim like compatibility command.
 if has('python3')
   command! -nargs=1 Python python3 <args>
-  command! -nargs=1 Pyeval py3eval <args>
+  function! s:Pyeval(text)
+    return py3eval(a:text)
+  endfunction
 elseif has('python')
   command! -nargs=1 Python python <args>
-  command! -nargs=1 Pyeval pyeval <args>
+  function! s:Pyeval(text)
+    return pyeval(a:text)
+  endfunction
 endif
 
 " This needs to be called outside of a function
@@ -65,7 +69,7 @@ function! youcompleteme#Enable()
   Python from ycm import user_options_store
   Python user_options_store.SetAll( base.BuildServerConf() )
 
-  if !Pyeval( 'base.CompatibleWithYcmCore()')
+  if !s:Pyeval( 'base.CompatibleWithYcmCore()' )
     echohl WarningMsg |
       \ echomsg "YouCompleteMe unavailable: YCM support libs too old, PLEASE RECOMPILE" |
       \ echohl None
@@ -337,7 +341,7 @@ function! s:SetCompleteFunc()
   let &completefunc = 'youcompleteme#Complete'
   let &l:completefunc = 'youcompleteme#Complete'
 
-  if Pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' )
+  if s:Pyeval 'ycm_state.NativeFiletypeCompletionUsable()'
     let &omnifunc = 'youcompleteme#OmniComplete'
     let &l:omnifunc = 'youcompleteme#OmniComplete'
 
@@ -464,20 +468,20 @@ function! s:UpdateDiagnosticNotifications()
   let should_display_diagnostics =
         \ get( g:, 'loaded_syntastic_plugin', 0 ) &&
         \ s:ForcedAsSyntasticCheckerForCurrentFiletype() &&
-        \ Pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' )
+        \ s:Pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' )
 
   if !should_display_diagnostics
     return
   endif
 
-  if Pyeval( 'ycm_state.DiagnosticsForCurrentFileReady()' )
+  if s:Pyeval 'ycm_state.DiagnosticsForCurrentFileReady()'
     SyntasticCheck
   endif
 endfunction
 
 
 function! s:IdentifierFinishedOperations()
-  if !Pyeval( 'base.CurrentIdentifierFinished()' )
+  if !s:Pyeval 'base.CurrentIdentifierFinished()'
     return
   endif
   Python ycm_state.OnCurrentIdentifierFinished()
@@ -518,7 +522,7 @@ endfunction
 
 
 function! s:OnBlankLine()
-  return Pyeval( 'not vim.current.line or vim.current.line.isspace()' )
+  return s:Pyeval( 'not vim.current.line or vim.current.line.isspace()' )
 endfunction
 
 
@@ -569,7 +573,7 @@ EOF
 
 function! s:CompletionsForQuery( query )
   Python results = GetCompletions( vim.eval( 'a:query' ) )
-  let results = Pyeval( 'results' )
+  let results = s:Pyeval( 'results' )
   let s:searched_and_results_found = len( results.words ) != 0
   return results
 endfunction
@@ -596,10 +600,10 @@ function! youcompleteme#Complete( findstart, base )
     endif
 
     Python request = ycm_state.CreateCompletionRequest()
-    if !Pyeval( 'bool(request)' )
+    if !s:Pyeval( 'bool(request)' )
       return -2
     endif
-    return Pyeval( 'request.CompletionStartColumn()' )
+    return s:Pyeval( 'request.CompletionStartColumn()' )
   else
     return s:CompletionsForQuery( a:base )
   endif
@@ -610,7 +614,7 @@ function! youcompleteme#OmniComplete( findstart, base )
   if a:findstart
     let s:omnifunc_mode = 1
     Python request = ycm_state.CreateCompletionRequest( force_semantic = True )
-    return Pyeval( 'request.CompletionStartColumn()' )
+    return s:Pyeval( 'request.CompletionStartColumn()' )
   else
     return s:CompletionsForQuery( a:base )
   endif
@@ -618,7 +622,7 @@ endfunction
 
 
 function! youcompleteme#ServerPid()
-  return Pyeval( 'ycm_state.ServerPid()' )
+  return s:Pyeval( 'ycm_state.ServerPid()' )
 endfunction
 
 
@@ -640,13 +644,13 @@ command! YcmShowDetailedDiagnostic call s:ShowDetailedDiagnostic()
 " required (currently that's on buffer save) OR when the SyntasticCheck command
 " is invoked
 function! youcompleteme#CurrentFileDiagnostics()
-  return Pyeval( 'ycm_state.GetDiagnosticsFromStoredRequest()' )
+  return s:Pyeval( 'ycm_state.GetDiagnosticsFromStoredRequest()' )
 endfunction
 
 
 function! s:DebugInfo()
   echom "Printing YouCompleteMe debug information..."
-  let debug_info = Pyeval( 'ycm_state.DebugInfo()' )
+  let debug_info = s:Pyeval( 'ycm_state.DebugInfo()' )
   for line in split( debug_info, "\n" )
     echom '-- ' . line
   endfor
@@ -692,13 +696,13 @@ command! -nargs=* -complete=custom,youcompleteme#SubCommandsComplete
   \ YcmCompleter call s:CompleterCommand(<f-args>)
 
 function! youcompleteme#SubCommandsComplete( arglead, cmdline, cursorpos )
-  return join( Pyeval( 'ycm_state.GetDefinedSubcommands()' ),
+  return join( s:Pyeval( 'ycm_state.GetDefinedSubcommands()' ),
     \ "\n")
 endfunction
 
 
 function! s:ForceCompile()
-  if !Pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' )
+  if !s:Pyeval( 'ycm_state.NativeFiletypeCompletionUsable()' )
     echom "Native filetype completion not supported for current file, "
           \ . "cannot force recompilation."
     return 0
@@ -707,7 +711,7 @@ function! s:ForceCompile()
   echom "Forcing compilation, this will block Vim until done."
   Python ycm_state.OnFileReadyToParse()
   while 1
-    let diagnostics_ready = Pyeval(
+    let diagnostics_ready = s:Pyeval(
           \ 'ycm_state.DiagnosticsForCurrentFileReady()' )
     if diagnostics_ready
       break
@@ -738,7 +742,7 @@ function! s:ShowDiagnostics()
     return
   endif
 
-  let diags = Pyeval( 'ycm_state.GetDiagnosticsFromStoredRequest()' )
+  let diags = s:Pyeval( 'ycm_state.GetDiagnosticsFromStoredRequest()' )
   if !empty( diags )
     call setloclist( 0, diags )
     lopen

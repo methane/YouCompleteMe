@@ -22,6 +22,7 @@ import vim
 from ycm import vimsupport
 from ycm import utils
 from ycm import user_options_store
+from ycm._compat import iteritems
 import ycm_client_support
 
 YCM_VAR_PREFIX = 'ycm_'
@@ -49,7 +50,7 @@ def BuildServerConf():
 def LoadJsonDefaultsIntoVim():
   defaults = user_options_store.DefaultOptions()
   vim_defaults = {}
-  for key, value in defaults.iteritems():
+  for key, value in iteritems(defaults):
     vim_defaults[ 'ycm_' + key ] = value
 
   vimsupport.LoadDictIntoVimGlobals( vim_defaults, overwrite = False )

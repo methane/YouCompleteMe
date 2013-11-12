@@ -26,7 +26,10 @@ from ycm.server import responses
 from ycm import utils
 import urllib2
 import urllib
-import urlparse
+try:
+    from urlparse import urljoin
+except ImportError:
+    from urllib.parse import urljoin
 import json
 import subprocess
 import logging
@@ -213,7 +216,7 @@ class CsharpCompleter( Completer ):
   def _GetResponse( self, handler, parameters = {}, silent = False ):
     """ Handle communication with server """
     # TODO: Replace usage of urllib with Requests
-    target = urlparse.urljoin( self._ServerLocation(), handler )
+    target = urljoin( self._ServerLocation(), handler )
     parameters = urllib.urlencode( parameters )
     response = urllib2.urlopen( target, parameters )
     return json.loads( response.read() )

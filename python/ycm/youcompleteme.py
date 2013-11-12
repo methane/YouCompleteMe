@@ -75,7 +75,7 @@ class YouCompleteMe( object ):
 
   def _SetupServer( self ):
     server_port = utils.GetUnusedLocalhostPort()
-    with tempfile.NamedTemporaryFile( delete = False ) as options_file:
+    with tempfile.NamedTemporaryFile( mode = 'w+', delete = False ) as options_file:
       self._temp_options_filename = options_file.name
       json.dump( dict( self._user_options ), options_file )
       args = [ utils.PathToPythonInterpreter(),

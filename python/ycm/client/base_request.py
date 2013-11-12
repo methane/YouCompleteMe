@@ -20,7 +20,10 @@
 import vim
 import json
 import requests
-import urlparse
+try:
+    from urlparse import urljoin
+except ImportError:
+    from urllib.parse import urljoin
 from retries import retries
 from requests_futures.sessions import FuturesSession
 from ycm.unsafe_thread_pool_executor import UnsafeThreadPoolExecutor
@@ -123,7 +126,7 @@ def JsonFromFuture( future ):
 
 
 def _BuildUri( handler ):
-  return urlparse.urljoin( BaseRequest.server_location, handler )
+  return urljoin( BaseRequest.server_location, handler )
 
 
 SERVER_HEALTHY = False

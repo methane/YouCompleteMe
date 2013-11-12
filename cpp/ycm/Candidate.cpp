@@ -28,21 +28,6 @@ namespace YouCompleteMe {
 
 namespace {
 
-std::string GetWordBoundaryChars( const std::string &text ) {
-  std::string result;
-
-  for ( uint i = 0; i < text.size(); ++i ) {
-    if ( i == 0 ||
-         IsUppercase( text[ i ] ) ||
-         ( i > 0 && text[ i - 1 ] == '_' && isalpha( text[ i ] ) )
-       ) {
-      result.push_back( tolower( text[ i ] ) );
-    }
-  }
-
-  return result;
-}
-
 LetterNode *FirstUppercaseNode( const std::list< LetterNode *> &list ) {
   LetterNode *node = NULL;
   foreach( LetterNode * current_node, list ) {
@@ -54,18 +39,29 @@ LetterNode *FirstUppercaseNode( const std::list< LetterNode *> &list ) {
   return node;
 }
 
-LetterNode *FirstLowercaseNode( const std::list< LetterNode *> &list ) {
-  LetterNode *node = NULL;
-  foreach( LetterNode * current_node, list ) {
-    if ( !current_node->LetterIsUppercase() ) {
-      node = current_node;
-      break;
+} // unnamed namespace
+
+std::string GetWordBoundaryChars( const std::string &text ) {
+  std::string result;
+
+  for ( uint i = 0; i < text.size(); ++i ) {
+    bool is_first_char_but_not_underscore = i == 0 && text[ i ] != '_';
+    bool is_good_uppercase = i > 0 &&
+                             IsUppercase( text[ i ] ) &&
+                             !IsUppercase( text[ i - 1 ] );
+    bool is_alpha_after_underscore = i > 0 &&
+                                     text[ i - 1 ] == '_' &&
+                                     isalpha( text[ i ] );
+
+    if ( is_first_char_but_not_underscore ||
+         is_good_uppercase ||
+         is_alpha_after_underscore ) {
+      result.push_back( tolower( text[ i ] ) );
     }
   }
-  return node;
-}
 
-} // unnamed namespace
+  return result;
+}
 
 
 Bitset LetterBitsetFromString( const std::string &text ) {
@@ -100,9 +96,13 @@ Result Candidate::QueryMatchResult( const std::string &query,
       return Result( false );
 
     if ( case_sensitive ) {
+      // When the query letter is uppercase, then we force an uppercase match
+      // but when the query letter is lowercase, then it can match both an
+      // uppercase and a lowercase letter. This is by design and it's much
+      // better than forcing lowercase letter matches.
       node = IsUppercase( letter ) ?
              FirstUppercaseNode( *list ) :
-             FirstLowercaseNode( *list );
+             list->front();
 
       if ( !node )
         return Result( false );

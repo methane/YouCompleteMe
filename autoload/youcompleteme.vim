@@ -65,7 +65,7 @@ function! youcompleteme#Enable()
   Python from ycm import user_options_store
   Python user_options_store.SetAll( base.BuildServerConf() )
 
-  if ! Pyeval( 'base.CompatibleWithYcmCore()')
+  if !Pyeval( 'base.CompatibleWithYcmCore()')
     echohl WarningMsg |
       \ echomsg "YouCompleteMe unavailable: YCM support libs too old, PLEASE RECOMPILE" |
       \ echohl None
@@ -674,7 +674,7 @@ function! s:CompleterCommand(...)
   endif
 
   Python ycm_state.SendCommandRequest( vim.eval( 'l:arguments' ),
-        \                          vim.eval( 'l:completer' ) )
+        \                              vim.eval( 'l:completer' ) )
 endfunction
 
 

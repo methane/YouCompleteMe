@@ -69,7 +69,8 @@ TEST( IdentifierCompleterTest, SmartCaseFiltering ) {
                  StringVector(
                    "fooBar",
                    "fooBaR" ) ).CandidatesForQuery( "fBr" ),
-               ElementsAre( "fooBar" ) );
+               ElementsAre( "fooBaR",
+                            "fooBar" ) );
 }
 
 TEST( IdentifierCompleterTest, FirstCharSameAsQueryWins ) {
@@ -205,6 +206,58 @@ TEST( IdentifierCompleterTest, SameLowercaseCandidateWins ) {
                    "Foobar" ) ).CandidatesForQuery( "foo" ),
                ElementsAre( "foobar",
                             "Foobar" ) );
+
+}
+
+TEST( IdentifierCompleterTest, PreferLowercaseCandidate ) {
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "chatContentExtension",
+                   "ChatContentExtension" ) ).CandidatesForQuery(
+                       "chatContent" ),
+               ElementsAre( "chatContentExtension",
+                            "ChatContentExtension" ) );
+
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "fooBar",
+                   "FooBar" ) ).CandidatesForQuery( "oba" ),
+               ElementsAre( "fooBar",
+                            "FooBar" ) );
+}
+
+TEST( IdentifierCompleterTest, ShorterAndLowercaseWins ) {
+  EXPECT_THAT( IdentifierCompleter(
+                 StringVector(
+                   "STDIN_FILENO",
+                   "stdin" ) ).CandidatesForQuery( "std" ),
+               ElementsAre( "stdin",
+                            "STDIN_FILENO" ) );
+}
+
+TEST( IdentifierCompleterTest, AddIdentifiersToDatabaseFromBufferWorks ) {
+  IdentifierCompleter completer;
+  completer.AddIdentifiersToDatabaseFromBuffer( "foo foogoo ba",
+                                                "foo",
+                                                "/foo/bar",
+                                                false );
+
+  EXPECT_THAT( completer.CandidatesForQueryAndType( "oo", "foo" ),
+               ElementsAre( "foo",
+                            "foogoo" ) );
+}
+
+TEST( IdentifierCompleterTest, TagsEndToEndWorks ) {
+  IdentifierCompleter completer;
+  std::vector< std::string > tag_files;
+  tag_files.push_back( PathToTestFile( "basic.tags" ).string() );
+
+  completer.AddIdentifiersToDatabaseFromTagFiles( tag_files );
+
+  EXPECT_THAT( completer.CandidatesForQueryAndType( "fo", "cpp" ),
+               ElementsAre( "foosy",
+                            "fooaaa" ) );
+
 }
 
 // TODO: tests for filepath and filetype candidate storing
